@@ -1,6 +1,9 @@
 import copy
 import random
 
+# Mostrar grafo en terminal para depuración
+SHOW_GRAFO = True
+
 # Definición del tablero
 # 0 = vacío, 1 = "X", 2 = "O"
 tablero = [
@@ -74,36 +77,81 @@ def tablero_lleno(tab):
 
 def elegir_mejor_movimiento(tab, jugador):
     """
-    IA sencilla: prueba cada casilla vacía y calcula
-    score = evaluar_patrones(tab_simulado, jugador) - evaluar_patrones(tab_simulado, oponente)
-    Devuelve (fila, col) elegido. Si hay empate entre movimientos, selecciona al azar.
+    Construye un grafo de movimientos de primer nivel (una entrada por cada jugada legal).
+    Cada nodo contiene la configuración resultante, la heurística para el jugador y para el
+    oponente, y si la jugada produce una victoria inmediata.
+
+    Luego selecciona la mejor jugada basándose en las heurísticas del grafo.
     """
-    oponente = 1 if jugador == 2 else 2
+    grafo = build_move_graph(tab, jugador)
+
+    # Mostrar grafo si está activado
+    if SHOW_GRAFO:
+        print('\n--- Grafo de movimientos (primer nivel) ---')
+        pretty_print_grafo(grafo)
+        print('--- fin grafo ---\n')
+
+    # Elegir el mejor movimiento según heurística del grafo
     mejores = []
     mejor_valor = None
+
+    for mov, nodo in grafo.items():
+        # valor simple: heur_jugador - heur_oponente, con prioridad a victorias
+        valor = nodo['heur_jugador'] - nodo['heur_oponente']
+        if nodo['winner'] == jugador:
+            valor += 100
+
+        # desempate por heurística absoluta del jugador
+        if (mejor_valor is None) or (valor > mejor_valor):
+            mejor_valor = valor
+            mejores = [mov]
+        elif valor == mejor_valor:
+            mejores.append(mov)
+
+    if not mejores:
+        return None
+    return random.choice(mejores)
+
+
+def build_move_graph(tab, jugador):
+    """
+    Construye y devuelve un diccionario donde cada clave es una tupla (fila,col)
+    que representa una jugada legal y el valor es un diccionario con:
+      - state: tablero resultante (matriz)
+      - heur_jugador: valor heurístico para 'jugador'
+      - heur_oponente: valor heurístico para el oponente
+      - winner: 0/1/2 si la jugada produce un ganador
+
+    Esta función no explora más allá de profundidad 1; sirve como grafo de movimientos
+    de primer nivel que luego puede usarse por algoritmos más complejos.
+    """
+    oponente = 1 if jugador == 2 else 2
+    grafo = {}
 
     for i in range(3):
         for j in range(3):
             if tab[i][j] == 0:
                 copia = copy.deepcopy(tab)
                 copia[i][j] = jugador
-                val_jugador = evaluar_patrones(copia, jugador)
-                val_oponente = evaluar_patrones(copia, oponente)
-                valor = val_jugador - val_oponente
+                heur_j = evaluar_patrones(copia, jugador)
+                heur_o = evaluar_patrones(copia, oponente)
+                win = ganador(copia)
 
-                # Si la jugada da victoria inmediata, darle gran prioridad
-                if ganador(copia) == jugador:
-                    valor += 100
+                grafo[(i, j)] = {
+                    'state': copia,
+                    'heur_jugador': heur_j,
+                    'heur_oponente': heur_o,
+                    'winner': win
+                }
 
-                if (mejor_valor is None) or (valor > mejor_valor):
-                    mejor_valor = valor
-                    mejores = [(i, j)]
-                elif valor == mejor_valor:
-                    mejores.append((i, j))
+    return grafo
 
-    if not mejores:
-        return None
-    return random.choice(mejores)
+
+def pretty_print_grafo(grafo):
+    # Imprime el grafo de movimientos para depuración
+    for mov, nodo in grafo.items():
+        i, j = mov
+        print(f'Mov {mov}: heur_jugador={nodo["heur_jugador"]}, heur_oponente={nodo["heur_oponente"]}, winner={nodo["winner"]}')
 
 
 def pedir_coordenada():
