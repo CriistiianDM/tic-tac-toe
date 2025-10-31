@@ -34,7 +34,7 @@ heuristicas = {
 }
 
 
-def change_heuristica(ruta,player): #indice escogido en meta
+def change_heuristica(ruta): #indice escogido en meta
     data = []
     conjunto = {0}
 
@@ -43,9 +43,11 @@ def change_heuristica(ruta,player): #indice escogido en meta
         conjunto.add(meta[ruta][i][2])
     
     if(len(conjunto)==3):
-        heuristicas[player][ruta-1] = 100
+        heuristicas[1][ruta-1] = 100
+        heuristicas[2][ruta-1] = 100
     else:
-        heuristicas[player][ruta-1] = 3 - data.count(player)
+        heuristicas[1][ruta-1] = 3 - data.count(1)
+        heuristicas[2][ruta-1] = 3 - data.count(2)
     
 
 
@@ -64,7 +66,7 @@ def addVisit(a,b,player):
 
 #revisar si alguien gano
 def check_winner(player): 
-    if(heuristicas[player].count(0)):
+    if(0 in heuristicas[player]):
         print(f"gano el jugador {player}")
         return True 
     else:
@@ -88,9 +90,7 @@ def sweep_data(a,b,player):
             
             if(ind != -1):
                 meta[key][ind] = [a,b,player]
-        
-        for key in range(1,9):
-            change_heuristica(key,player)
+                change_heuristica(key)
         
         addVisit(a,b,player)
 
@@ -108,12 +108,6 @@ winner_exist = False #verificar si hay un ganador
 turno = int(input("Si escoges 1 empieza la maquina, si escoges 2 empiezas tu: \n"))
 
 while(not winner_exist): #mientras no exista un ganador
-
-    for fila in estado:
-        print(" | ".join(str(x) for x in fila))
-    print(heuristicas)
-    print(meta)
-    print(visitados)
 
     change_turno = False
 
@@ -149,3 +143,9 @@ while(not winner_exist): #mientras no exista un ganador
             turno = 2
         else:
             turno = 1
+    
+    for fila in estado:
+        print(" | ".join(str(x) for x in fila))
+    print(heuristicas)
+    print(meta)
+    print(visitados)
