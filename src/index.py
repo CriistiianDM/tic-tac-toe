@@ -72,33 +72,6 @@ def get_empty_positions(board):
                 empties.append((r, c))
     return empties
 
-def evaluate_position(board, pos, machine=2, player=1):
-    """
-    Simula colocar `machine` en pos (r,c) y devuelve:
-      1  -> colocando allí la máquina gana inmediatamente
-     -1  -> no gana inmediatamente y existe una respuesta inmediata del jugador que le hace ganar (pérdida)
-      0  -> ni gana ni pierde inmediatamente (considerado empate/neutro)
-    Nota: si pos ya ocupada devuelve 0 (se considera empate/neutro).
-    """
-    r, c = pos
-    if board[r][c] != 0:
-        return 0
-    b = copy.deepcopy(board)
-    b[r][c] = machine
-    # 1 Gana Maquina
-    if check_win(b, machine):
-        return 1
-    # si tablero lleno -> empate
-    if not get_empty_positions(b):
-        return 0
-    # Pierde -1
-    for (pr, pc) in get_empty_positions(b):
-        b2 = copy.deepcopy(b)
-        b2[pr][pc] = player
-        if check_win(b2, player):
-            return -1
-    return 0
-
 def minimax_recursive_choice(board, machine=2, player=1):
     """
     Devuelve la mejor jugada (r,c) usando minimax recursivo.
@@ -168,7 +141,7 @@ def draw_winner(surface):
     s = font.render(txt, True, NEGRO)
     r = s.get_rect(center=(ANCHO // 2, GRID_SIZE // 2))
     surface.blit(s, r)
-    
+
 def draw_grid(surface):
     # fondo tablero
     for row in range(ROWS):
