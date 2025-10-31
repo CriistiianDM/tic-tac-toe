@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import copy
 
 pygame.init()
 
@@ -33,6 +34,11 @@ cell_h = GRID_SIZE // ROWS
 line_thickness = 6
 padding = 20 
 
+## Variuebles Globales
+game_over = False
+winner = None
+
+
 button_w, button_h = 200, 50
 button_x = (ANCHO - button_w) // 2
 button_y = GRID_SIZE + 40
@@ -46,11 +52,123 @@ clock = pygame.time.Clock()
 
 turn = 'player' 
 
+def check_win(board, player):
+    """Devuelve True si `player` (1 o 2) tiene línea ganadora."""
+    # filas/columnas
+    for i in range(3):
+        if all(board[i][j] == player for j in range(3)): return True
+        if all(board[j][i] == player for j in range(3)): return True
+    # diagonales
+    if all(board[i][i] == player for i in range(3)): return True
+    if all(board[i][2-i] == player for i in range(3)): return True
+    return False
+
+def get_empty_positions(board):
+    """Devuelve lista de tuplas (r,c) de casillas vacías."""
+    empties = []
+    for r in range(3):
+        for c in range(3):
+            if board[r][c] == 0:
+                empties.append((r, c))
+    return empties
+
+def evaluate_position(board, pos, machine=2, player=1):
+    """
+    Simula colocar `machine` en pos (r,c) y devuelve:
+      1  -> colocando allí la máquina gana inmediatamente
+     -1  -> no gana inmediatamente y existe una respuesta inmediata del jugador que le hace ganar (pérdida)
+      0  -> ni gana ni pierde inmediatamente (considerado empate/neutro)
+    Nota: si pos ya ocupada devuelve 0 (se considera empate/neutro).
+    """
+    r, c = pos
+    if board[r][c] != 0:
+        return 0
+    b = copy.deepcopy(board)
+    b[r][c] = machine
+    # 1 Gana Maquina
+    if check_win(b, machine):
+        return 1
+    # si tablero lleno -> empate
+    if not get_empty_positions(b):
+        return 0
+    # Pierde -1
+    for (pr, pc) in get_empty_positions(b):
+        b2 = copy.deepcopy(b)
+        b2[pr][pc] = player
+        if check_win(b2, player):
+            return -1
+    return 0
+
+def minimax_recursive_choice(board, machine=2, player=1):
+    """
+    Devuelve la mejor jugada (r,c) usando minimax recursivo.
+    Scores:  1 = victoria máquina, -1 = victoria jugador, 0 = empate.
+    Se usa profundidad como criterio de desempate (prefiere ganar antes / perder después).
+    """
+    def minimax(is_maximizing):
+        # terminales
+        if check_win(board, machine):
+            return 1, 0
+        if check_win(board, player):
+            return -1, 0
+        empties = get_empty_positions(board)
+        if not empties:
+            return 0, 0
+
+        if is_maximizing:
+            best_score, best_depth = -2, 999
+            for (r, c) in empties:
+                board[r][c] = machine
+                score, depth = minimax(False)
+                board[r][c] = 0
+                depth += 1
+                # prefer mayor score; si igual, prefer menor depth (ganar antes)
+                if (score > best_score) or (score == best_score and depth < best_depth):
+                    best_score, best_depth = score, depth
+            return best_score, best_depth
+        else:
+            best_score, best_depth = 2, 999
+            for (r, c) in empties:
+                board[r][c] = player
+                score, depth = minimax(True)
+                board[r][c] = 0
+                depth += 1
+                # minimiza score; si igual, preferir mayor depth (hacer que la máquina tarde en ganar)
+                if (score < best_score) or (score == best_score and depth < best_depth):
+                    best_score, best_depth = score, depth
+            return best_score, best_depth
+
+    best_move = None
+    best_score, best_depth = -2, 999
+    for (r, c) in get_empty_positions(board):
+        board[r][c] = machine
+        score, depth = minimax(False)
+        board[r][c] = 0
+        depth += 1
+        if (score > best_score) or (score == best_score and depth < best_depth):
+            best_score, best_depth, best_move = score, depth, (r, c)
+            if best_score == 1:
+                break
+    return best_move
+
 def reset_board_and_choose_start():
-    global board, turn
+    global board, turn, game_over, winner
     board = [[0 for _ in range(COLS)] for _ in range(ROWS)]
     turn = random.choice(['player', 'machine'])
+    game_over = False
+    winner = None   
 
+def draw_winner(surface):
+    if not game_over:
+        return
+    if winner == 'EMPATE':
+        txt = "EMPATE"
+    else:
+        txt = f"GANADOR: {winner}"
+    s = font.render(txt, True, NEGRO)
+    r = s.get_rect(center=(ANCHO // 2, GRID_SIZE // 2))
+    surface.blit(s, r)
+    
 def draw_grid(surface):
     # fondo tablero
     for row in range(ROWS):
@@ -134,20 +252,43 @@ while True:
             if button_rect.collidepoint(mouse_pos):
                 reset_board_and_choose_start()
             else:
-                if turn == 'player':
+                if not game_over and turn == 'player':
                     cell = board_cell_at_pos(mouse_pos)
                     if cell:
                         r, c = cell
                         if board[r][c] == 0:
                             board[r][c] = 1
-                            turn = 'machine'
+                            # comprobar si gana el jugador
+                            if check_win(board, 1):
+                                game_over = True
+                                winner = 'JUGADOR'
+                            elif not get_empty_positions(board):
+                                game_over = True
+                                winner = 'EMPATE'
+                            else:
+                                turn = 'machine'
+
+    if turn == 'machine' and not game_over:
+        draw_disabled_overlay(pantalla)
+        move = minimax_recursive_choice(board)
+        if move:
+            r, c = move
+            board[r][c] = 2
+            if check_win(board, 2):
+                game_over = True
+                winner = 'MÁQUINA'
+            elif not get_empty_positions(board):
+                game_over = True
+                winner = 'EMPATE'
+            else:
+                turn = 'player'
+        else:
+            game_over = True
+            winner = 'EMPATE'
 
     pantalla.fill(BLANCO)
     draw_board(pantalla)
     draw_ui(pantalla)
-
-    if turn == 'machine':
-        draw_disabled_overlay(pantalla)
-
+    draw_winner(pantalla)
     pygame.display.flip()
     clock.tick(60)
