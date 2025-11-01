@@ -154,21 +154,20 @@ Al iniciar el juego, podrás elegir:
 
 ## 📁 Estructura del Proyecto
 
-```
-tic-tac-toe/
-│
-├── src/
-│   ├── application/           # Lógica principal del juego e IA
-│   ├── modules/               # Módulos auxiliares o reutilizables
-│   ├── view/                  # Interfaz gráfica (Pygame)
-│   ├── conteo_incorrectas.py  # Análisis o conteo de jugadas inválidas
-│   ├── index.py               # Punto de entrada principal del juego
-│   └── patrones_ganadores.py  # Comprobación de combinaciones ganadoras
-│
-├── venv/                      # Entorno virtual de Python
-├── .gitignore                 # Archivos y carpetas ignoradas por Git
-├── README.md                  # Documentación del proyecto
-└── requirements.txt            # Dependencias necesarias del proyecto
+  tic-tac-toe/
+  │
+  ├── src/
+  │   ├── application/           # Lógica principal del juego e IA
+  │   ├── modules/               # Módulos auxiliares o reutilizables
+  │   ├── view/                  # Interfaz gráfica (Pygame)
+  │   ├── conteo_incorrectas.py  # Análisis o conteo de jugadas inválidas
+  │   ├── index.py               # Punto de entrada principal del juego
+  │   └── patrones_ganadores.py  # Comprobación de combinaciones ganadoras
+  │
+  ├── venv/                      # Entorno virtual de Python
+  ├── .gitignore                 # Archivos y carpetas ignoradas por Git
+  ├── README.md                  # Documentación del proyecto
+  └── requirements.txt            # Dependencias necesarias del proyecto
 ```
 
 ## 🔬 Complejidad Algorítmica
@@ -218,15 +217,6 @@ La IA implementa una estrategia óptima que:
 python -m pytest tests/
 ```
 
-### Contribuir
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
 
 ## 📚 Referencias
 
@@ -234,28 +224,10 @@ Las contribuciones son bienvenidas. Por favor:
 - Wikipedia: [Minimax Algorithm](https://en.wikipedia.org/wiki/Minimax)
 - Wikipedia: [Alpha-Beta Pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning)
 
-## 👨‍💻 Autor
-
-**Cristian DM**
-- GitHub: [@CriistiianDM](https://github.com/CriistiianDM)
 
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
-## 🎯 Próximas Mejoras
-
-- [ ] Interfaz gráfica con Pygame
-- [ ] Diferentes niveles de dificultad
-- [ ] Estadísticas de partidas
-- [ ] Modo multijugador en red
-- [ ] Tableros de diferentes tamaños (4x4, 5x5)
-- [ ] Implementación de otros algoritmos de IA (Monte Carlo Tree Search)
-
-## 🙏 Agradecimientos
-
-Gracias a la comunidad de Python y a todos los que han contribuido a la teoría de juegos y algoritmos de búsqueda adversarial.
 
 ---
-
-⭐️ Si te gusta este proyecto, no olvides darle una estrella en GitHub!
