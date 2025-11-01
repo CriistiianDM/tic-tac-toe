@@ -140,13 +140,12 @@ Al iniciar el juego, podrás elegir:
 ### Cómo Jugar
 
 1. El tablero se muestra numerado del 1 al 9:
-   ```
+   
    1 | 2 | 3
    ---------
    4 | 5 | 6
    ---------
    7 | 8 | 9
-   ```
 
 2. Ingresa el número de la casilla donde deseas colocar tu símbolo
 3. La IA realizará su movimiento automáticamente
