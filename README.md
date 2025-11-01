@@ -99,12 +99,37 @@ cd tic-tac-toe
 ### Ejecutar el Juego
 
 ```bash
-python tic_tac_toe.py
+# crear venv (si no existe)
+python -m venv venv
+
+# si PowerShell bloquea scripts:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
+# activar
+.\venv\Scripts\activate
+
+# instalar requirements
+pip install -r requirements.txt
 ```
 
 ## 💻 Uso
 
 ### Modo de Juego
+
+### Seleccionar algoritmo (Minimax vs Alfa-Beta) vía variable de entorno
+
+Ahora puedes elegir qué algoritmo usa la IA configurando la variable de entorno `USE_ALPHA`.
+
+**Comportamiento**
+- `USE_ALPHA=1`, `true`, `yes` → usa **Minimax con poda Alfa-Beta** (por defecto).
+- `USE_ALPHA=0`, `false`, `no` → usa **Minimax recursivo**.
+
+**Ejemplos (temporal, para la sesión actual)**
+
+PowerShell:
+```powershell
+$env:USE_ALPHA = "0"   # usar minimax recursivo
+py .\src\index.py
 
 Al iniciar el juego, podrás elegir:
 
@@ -132,12 +157,18 @@ Al iniciar el juego, podrás elegir:
 ```
 tic-tac-toe/
 │
-├── README.md                 # Documentación del proyecto
-├── tic_tac_toe.py           # Archivo principal del juego
-├── minimax.py               # Implementación del algoritmo Minimax
-├── alpha_beta.py            # Implementación de Minimax con poda alfa-beta
-├── board.py                 # Representación y gestión del tablero
-└── utils.py                 # Funciones auxiliares
+├── src/
+│   ├── application/           # Lógica principal del juego e IA
+│   ├── modules/               # Módulos auxiliares o reutilizables
+│   ├── view/                  # Interfaz gráfica (Pygame)
+│   ├── conteo_incorrectas.py  # Análisis o conteo de jugadas inválidas
+│   ├── index.py               # Punto de entrada principal del juego
+│   └── patrones_ganadores.py  # Comprobación de combinaciones ganadoras
+│
+├── venv/                      # Entorno virtual de Python
+├── .gitignore                 # Archivos y carpetas ignoradas por Git
+├── README.md                  # Documentación del proyecto
+└── requirements.txt            # Dependencias necesarias del proyecto
 ```
 
 ## 🔬 Complejidad Algorítmica
